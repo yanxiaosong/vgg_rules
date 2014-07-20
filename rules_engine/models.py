@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from random import random
+import random
 import string
 import time
 from django.db import models
@@ -56,7 +56,7 @@ class Order(models.Model):
     modify_time = models.DateTimeField(auto_now_add=True, auto_now=True)
     create_time = models.DateTimeField(auto_now_add=True)
 
-    object = OrderManager()
+    objects = OrderManager()
 
     class Meta:
         db_table = 'order'
@@ -65,6 +65,9 @@ class Order(models.Model):
 class OrderDetailManager(models.Manager):
 
     def purchase_item(self, order_number, product_code, amount):
+
+        if amount < 1:
+            return None
 
         order = Order.objects.get(order_number=order_number)
         product = Product.objects.get(product_code=product_code)
@@ -77,6 +80,8 @@ class OrderDetailManager(models.Manager):
         od.regular_price = product.price * amount
         od.save()
 
+        return od
+
 
 class OrderDetail(models.Model):
 
@@ -86,9 +91,9 @@ class OrderDetail(models.Model):
     amount = models.IntegerField()
     unit_price = models.IntegerField()
     regular_price = models.IntegerField()
-    actual_price = models.IntegerField()
+    actual_price = models.IntegerField(null=True)
 
-    object = OrderDetailManager()
+    objects = OrderDetailManager()
 
     class Meta:
         db_table = 'order_detail'
@@ -97,7 +102,7 @@ class OrderDetail(models.Model):
 class OrderPromotionLog(models.Model):
     id = models.AutoField(primary_key=True)
     promotion = models.ForeignKey('Promotion', blank=True, null=True)
-    order = models.ForeignKey(Order, null=True, blank=True)
+    order = models.ForeignKey(Order, related_name="order_promotions", null=True, blank=True)
     order_detail = models.ForeignKey(OrderDetail, null=True, blank=True)
     amount = models.IntegerField(null=True, blank=True)
     promotion_date = models.DateTimeField(null=True, blank=True)
@@ -107,6 +112,10 @@ class OrderPromotionLog(models.Model):
 
 
 class Promotion(models.Model):
+
+    PROMOTION_STATUS_ACTIVE = 1
+    PROMOTION_STATUS_INACTIVE = 0
+
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=50)
     rule_script = models.TextField()

@@ -1,9 +1,10 @@
+import json
 from operator import mod
 from business_rules.actions import BaseActions, rule_action
 from business_rules.fields import FIELD_NUMERIC
 from business_rules.variables import BaseVariables, numeric_rule_variable, string_rule_variable
 import datetime
-from rules_engine.models import OrderPromotionLog
+from rules_engine.models import OrderPromotionLog, Promotion
 
 
 class OrderDetailVariables(BaseVariables):
@@ -90,5 +91,17 @@ def log_promotion(order_detail, promotion_id):
 
 
 def get_rules():
-    pass
 
+    all_promotions = Promotion.objects.filter(status=Promotion.PROMOTION_STATUS_ACTIVE)
+    rules = []
+    for promo in all_promotions:
+
+        # update the rules with promtion id
+        promo_id = promo.id
+        print type(str(promo.rule_script))
+        print promo.rule_script
+        rule_dict = json.loads(promo.rule_script)
+        rule_dict.update(promotion_id=promo_id)
+        rules.append(rule_dict)
+
+    return rules
