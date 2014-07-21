@@ -1,8 +1,7 @@
 from __future__ import unicode_literals
-import random
-import string
 import time
 from django.db import models
+from rules_engine.util import random_string_generator
 
 
 class Product(models.Model):
@@ -34,14 +33,9 @@ class OrderManager(models.Manager):
         ORDER NUM = RAMDOM CHARACTER(5) + TIME MILLISECONDS FOR DATE TIME (10 DIGITS)
         """
         current_milli_time = str(int(round(time.time())))
-        rand_str = OrderManager._random_string_generator()
+        rand_str = random_string_generator()
 
         return '%s%s' % (rand_str, current_milli_time)
-
-    @staticmethod
-    def _random_string_generator(size=4, chars=string.ascii_uppercase + string.digits):
-        return ''.join(random.choice(chars) for x in range(size))
-
 
 class Order(models.Model):
 
@@ -72,12 +66,17 @@ class OrderDetailManager(models.Manager):
         order = Order.objects.get(order_number=order_number)
         product = Product.objects.get(product_code=product_code)
 
-        od = self.model()
-        od.order = order
-        od.product = product
-        od.unit_price = product.price
-        od.amount = amount
-        od.regular_price = product.price * amount
+        od_filter = self.filter(order=order, product=product)
+        if not od_filter:
+            od = self.model()
+            od.order = order
+            od.product = product
+            od.unit_price = product.price
+        else:
+            od = od_filter.get()
+
+        od.amount += amount
+        od.regular_price = product.price * od.amount
         od.actual_price = od.regular_price  # by default, actual price = regular price
         od.save()
 
@@ -89,9 +88,9 @@ class OrderDetail(models.Model):
     id = models.AutoField(primary_key=True)
     order = models.ForeignKey(Order, related_name="details")
     product = models.ForeignKey('Product')
-    amount = models.IntegerField()
-    unit_price = models.IntegerField()
-    regular_price = models.IntegerField()
+    amount = models.IntegerField(default=0)
+    unit_price = models.IntegerField(default=0)
+    regular_price = models.IntegerField(default=0)
     actual_price = models.IntegerField(null=True)
 
     objects = OrderDetailManager()
@@ -104,7 +103,7 @@ class OrderPromotionLog(models.Model):
     id = models.AutoField(primary_key=True)
     promotion = models.ForeignKey('Promotion', blank=True, null=True)
     order = models.ForeignKey(Order, related_name="order_promotions", null=True, blank=True)
-    order_detail = models.ForeignKey(OrderDetail, null=True, blank=True)
+    order_detail = models.ForeignKey(OrderDetail, related_name="order_detail_promotions", null=True, blank=True)
     amount = models.IntegerField(null=True, blank=True)
     promotion_date = models.DateTimeField(null=True, blank=True)
 
