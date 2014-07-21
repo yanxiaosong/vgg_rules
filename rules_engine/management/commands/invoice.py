@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from rules_engine.models import Order
+from rules_engine.service import print_invoice
 
 
 class Command(BaseCommand):

@@ -49,6 +49,6 @@ def print_invoice(order_number):
         for promotion in od.order_detail_promotions.all():
             invoice += "Promotion %s\n" % promotion.promotion.code
             invoice += "%s\n" % promotion.promotion.description
-        invoice += "-----------------------------"
+        invoice += "-----------------------------\n"
 
     return invoice
