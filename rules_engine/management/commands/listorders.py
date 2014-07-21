@@ -10,13 +10,13 @@ class Command(BaseCommand):
 
         try:
             orders = Order.objects.all()
-            print "perf"
             order_lists = "Order Count: %d\n" % orders.count()
 
             for order in orders:
-                order_lists += "Order Num: %s | Status: %s | Date: %s \n" % (order.order_number, order.order_status, order.create_time)
+                order_lists += "Order Num: %s | Status: %s | Date: %s \n" % (order.order_number,
+                                                                             order.order_status,
+                                                                             order.create_time)
 
-            print "perf123"
         except ValueError, e:
             raise CommandError(e.message)
 

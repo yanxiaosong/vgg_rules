@@ -37,18 +37,18 @@ def print_invoice(order_number):
     if order.status != Order.ORDER_STATUS_READY:
         raise Exception("Invoice is not available. Order %s has not been checked out. " % order_number)
 
-    invoice = "Order Number: %s\n" + \
+    invoice = "Order Number: %s\n" % order_number + \
               "REGLR PRICE %s\n" % format_money(order.regular_price) + \
               "PRMTN PRICE %s\n" % format_money(order.actual_price) + \
-              "===============================\n"
+              "================= ITEMS ==============\n"
 
-    for od in order.details:
-        invoice += "CODE:%s     NAME:%s" % (od.product.product_code, od.product.name)
+    for od in order.details.all():
+        invoice += "CODE:%s     NAME:%s\n" % (od.product.product_code, od.product.name)
         invoice += "REGLR PRICE %s\n" % format_money(od.regular_price)
         invoice += "PRMTN PRICE %s\n" % format_money(od.actual_price)
-        for promotion in od.order_detail_promotions:
-            invoice += "Promotion %s\n" % promotion.code
-            invoice += "%s\n" % promotion.description
+        for promotion in od.order_detail_promotions.all():
+            invoice += "Promotion %s\n" % promotion.promotion.code
+            invoice += "%s\n" % promotion.promotion.description
         invoice += "-----------------------------"
 
     return invoice
