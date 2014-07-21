@@ -3,7 +3,7 @@ import string
 
 
 def format_money(price):
-    return "{:8.2f}".format(price)
+    return "{:8.2f}".format(price/100)
 
 
 def random_string_generator(size=4, chars=string.ascii_uppercase + string.digits):
