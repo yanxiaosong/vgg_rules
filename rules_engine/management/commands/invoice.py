@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from rules_engine.models import OrderDetail, Product, Order
-from rules_engine.service import checkout_order
+from rules_engine.models import Order
 
 
 class Command(BaseCommand):
