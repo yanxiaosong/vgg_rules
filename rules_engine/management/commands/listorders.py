@@ -17,7 +17,7 @@ class Command(BaseCommand):
                                                                              order.order_status,
                                                                              order.create_time)
 
-        except ValueError, e:
+        except Exception, e:
             raise CommandError(e.message)
 
         self.stdout.write(order_lists)
