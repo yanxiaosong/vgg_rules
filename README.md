@@ -93,6 +93,8 @@ Order Num: WIY51405918562 | Status: New(0) | Date: 2014-07-21 04:56:02+00:00
 
 Check out order, change the order status, and implement all the available promotion rules to purchased items.
 
+`$ python manage.py checkout <ordre_number>`
+
 
 ### 5. Print the order invoice
 
