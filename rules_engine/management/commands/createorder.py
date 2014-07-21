@@ -1,22 +1,15 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.utils import translation
+from rules_engine.models import Order
 
 
 class Command(BaseCommand):
 
-    can_import_settings = True
+    help = 'create an new order.'
 
     def handle(self, *args, **options):
+        try:
+            order = Order.objects.create_order()
+        except Exception, e:
+            raise CommandError('order was not created successfully. Error: %s' % e.message)
 
-        # Activate a fixed locale, e.g. Russian
-        translation.activate('ru')
-
-        # Or you can activate the LANGUAGE_CODE # chosen in the settings:
-        #
-        #from django.conf import settings
-        #translation.activate(settings.LANGUAGE_CODE)
-
-        # Your command logic here
-        # ...
-
-        translation.deactivate()
+        self.stdout.write('Successfully created order. Order Number = "%s"' % order.order_number)

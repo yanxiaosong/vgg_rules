@@ -50,3 +50,5 @@ def print_invoice(order_number):
             invoice += "Promotion %s\n" % promotion.code
             invoice += "%s\n" % promotion.description
         invoice += "-----------------------------"
+
+    return invoice

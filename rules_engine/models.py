@@ -52,6 +52,15 @@ class Order(models.Model):
 
     objects = OrderManager()
 
+    @property
+    def order_status(self):
+        if self.status == Order.ORDER_STATUS_READY:
+            return "Checkout(1)"
+        elif self.status == Order.ORDER_STATUS_NEW:
+            return "New(0)"
+
+        return "Unknown"
+
     class Meta:
         db_table = 'order'
 
