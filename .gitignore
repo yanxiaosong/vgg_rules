@@ -42,7 +42,6 @@ nosetests.xml
 
 .svn
 
-cdemo_portal/settings/local_*.py
 worker_app/settings_dev.py
 
 *.log
