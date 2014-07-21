@@ -82,9 +82,11 @@ List all the orders.
 
 A sample order list:
 
+<pre><code>
 Order Count: 2
 Order Num: 6QIE1405909818 | Status: Checkout(1) | Date: 2014-07-21 02:30:18+00:00
 Order Num: WIY51405918562 | Status: New(0) | Date: 2014-07-21 04:56:02+00:00
+<\pre><\code>
 
 
 ### 4. Checkout Order
