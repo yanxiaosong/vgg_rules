@@ -2,6 +2,7 @@ from django.test import TestCase
 from ..models import Order, OrderDetail, Product
 from ..service import checkout_order, print_invoice
 
+
 class RuleEngineTest(TestCase):
 
     def test_create_order(self):
@@ -40,10 +41,8 @@ class RuleEngineTest(TestCase):
 
         self.assertEqual(order.details.count(), 2)
 
-    def test_show_orders(self):
-        pass
 
-    def test_check_out(self):
+    def test_checkout_without_promotion(self):
 
         # Test case 1: no promotion
         order = Order.objects.create_order()
@@ -54,9 +53,24 @@ class RuleEngineTest(TestCase):
 
         self.assertEqual(order.details.count(), 2)
         self.assertEqual(order.regular_price, 15100)
+        self.assertEqual(order.actual_price, 15100)
         self.assertEqual(order.order_promotions.count(), 0)
 
-        # Test case 2: promotion: Buy 2 apple, get 1 free
+        order = Order.objects.create_order()
+        od = OrderDetail.objects.purchase_item(order.order_number, 'BLBRRY', 15)
+        od = OrderDetail.objects.purchase_item(order.order_number, 'PEAR', 100)
+
+        order = checkout_order(order.order_number)
+
+        self.assertEqual(order.details.count(), 2)
+        self.assertEqual(order.regular_price, 22500)
+        self.assertEqual(order.actual_price, 22500)
+        self.assertEqual(order.order_promotions.count(), 0)
+
+
+    def test_checkout_promotion_buy_and_get_cheaper(self):
+
+        # Test case 1: promotion: Buy 5 apple, get 2 free
         order = Order.objects.create_order()
         od = OrderDetail.objects.purchase_item(order.order_number, 'APPLE', 7)
         od = OrderDetail.objects.purchase_item(order.order_number, 'PEAR', 100)
@@ -69,8 +83,7 @@ class RuleEngineTest(TestCase):
         self.assertEqual(order.order_promotions.count(), 1)
         self.assertEqual(order.order_promotions.get().amount, 200)
 
-
-        # Test case 3: promotion: Buy 2 apple, get 1 free
+        # Test case 2: promotion: Buy 5 apple, get 2 free
         order = Order.objects.create_order()
         od = OrderDetail.objects.purchase_item(order.order_number, 'APPLE', 17)
         od = OrderDetail.objects.purchase_item(order.order_number, 'PEAR', 100)
@@ -83,7 +96,7 @@ class RuleEngineTest(TestCase):
         self.assertEqual(order.order_promotions.count(), 1)
         self.assertEqual(order.order_promotions.get().amount, 400)
 
-        # Test case 4: promotion: Buy 2 apple, get 1 free
+        # Test case 3: promotion: Buy 5 apple, get 2 free
         order = Order.objects.create_order()
         od = OrderDetail.objects.purchase_item(order.order_number, 'APPLE', 20)
         od = OrderDetail.objects.purchase_item(order.order_number, 'PEAR', 100)
@@ -95,3 +108,70 @@ class RuleEngineTest(TestCase):
         self.assertEqual(order.actual_price, 16500)
         self.assertEqual(order.order_promotions.count(), 1)
         self.assertEqual(order.order_promotions.get().amount, 500)
+
+
+    def test_checkout_promotion_buy_group_and_cheaper(self):
+
+        # test case:  single promotion
+        order = Order.objects.create_order()
+        od = OrderDetail.objects.purchase_item(order.order_number, 'APPLE', 20)
+        od = OrderDetail.objects.purchase_item(order.order_number, 'ORANGE', 2)
+
+        order = checkout_order(order.order_number)
+
+        self.assertEqual(order.details.count(), 2)
+        self.assertEqual(order.regular_price, 2400)
+        self.assertEqual(order.actual_price, 1900)
+        self.assertEqual(order.order_promotions.count(), 1)
+        self.assertEqual(order.order_promotions.get().amount, 500)
+
+        # test case:  multiple promotions
+        order = Order.objects.create_order()
+        od = OrderDetail.objects.purchase_item(order.order_number, 'APPLE', 20)
+        od = OrderDetail.objects.purchase_item(order.order_number, 'ORANGE', 3)
+
+        order = checkout_order(order.order_number)
+
+        self.assertEqual(order.details.count(), 2)
+        self.assertEqual(order.regular_price, 2600)
+        self.assertEqual(order.actual_price, 2040)
+        self.assertEqual(order.order_promotions.count(), 2)
+
+        total_save= 0
+        for prom in order.order_promotions.all():
+            total_save += prom.amount
+        self.assertEqual(total_save, 560)
+
+        # test case:  multiple promotions
+        order = Order.objects.create_order()
+        od = OrderDetail.objects.purchase_item(order.order_number, 'APPLE', 20)
+        od = OrderDetail.objects.purchase_item(order.order_number, 'ORANGE', 5)
+
+        order = checkout_order(order.order_number)
+
+        self.assertEqual(order.details.count(), 2)
+        self.assertEqual(order.regular_price, 3000)
+        self.assertEqual(order.actual_price, 2440)
+        self.assertEqual(order.order_promotions.count(), 2)
+
+        total_save = 0
+        for prom in order.order_promotions.all():
+            total_save += prom.amount
+        self.assertEqual(total_save, 560)
+
+        # test case:  multiple promotions
+        order = Order.objects.create_order()
+        od = OrderDetail.objects.purchase_item(order.order_number, 'APPLE', 20)
+        od = OrderDetail.objects.purchase_item(order.order_number, 'ORANGE', 9)
+
+        order = checkout_order(order.order_number)
+
+        self.assertEqual(order.details.count(), 2)
+        self.assertEqual(order.regular_price, 3800)
+        self.assertEqual(order.actual_price, 3120)
+        self.assertEqual(order.order_promotions.count(), 2)
+
+        total_save = 0
+        for prom in order.order_promotions.all():
+            total_save += prom.amount
+        self.assertEqual(total_save, 680)

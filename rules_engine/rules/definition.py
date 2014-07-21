@@ -67,8 +67,8 @@ class OrderDetailActions(BaseActions):
         """
 
         # calculate promotion price
-        group_price_count = int(self.order_detail.amount / group_count)
-        regular_price_count = self.order_detail.amount - group_price_count * group_count
+        group_price_count = int(self.order_detail.amount / group_count) * group_count
+        regular_price_count = mod(self.order_detail.amount, group_count)
         actual_price = group_price_count * sale_price + regular_price_count * self.order_detail.unit_price
 
         # update the order price
@@ -91,6 +91,10 @@ def log_promotion(order_detail, promotion_id):
 
 
 def get_rules():
+
+    """
+    get promotion rules from database
+    """
 
     all_promotions = Promotion.objects.filter(status=Promotion.PROMOTION_STATUS_ACTIVE)
     rules = []
