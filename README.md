@@ -14,7 +14,7 @@ Rule Script Examples:
 
 The "name" in "condtions" is defined in python class `OrderDetailVariables`. The "name" in "action" is defined in python class `OrderDetailActions`.
 
-1. Buy 3 oranges in a group at price $1.80 each(10% off).
+####1. Buy 3 oranges in a group at price $1.80 each(10% off).
 
 ```json
 
@@ -36,7 +36,7 @@ The "name" in "condtions" is defined in python class `OrderDetailVariables`. The
 }
 ```
 
-2. Buy 5 apple, get 2 free
+####2. Buy 5 apple, get 2 free
 
 ```json
 { "conditions": { "all": [
