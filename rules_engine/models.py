@@ -78,6 +78,7 @@ class OrderDetailManager(models.Manager):
         od.unit_price = product.price
         od.amount = amount
         od.regular_price = product.price * amount
+        od.actual_price = od.regular_price  # by default, actual price = regular price
         od.save()
 
         return od

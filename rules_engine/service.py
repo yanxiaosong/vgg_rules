@@ -11,16 +11,18 @@ def checkout_order(order_number):
     # implement promotion rules
     order_regular_price = 0
     order_actual_price = 0
-    for od in order.details:
 
-        run_all(rules=rules,
-                variables=OrderDetailVariables(od),
-                actions=OrderDetailActions(od),
-                stop_on_first_trigger=True
-               )
+    for od in order.details.all():
 
-        order_regular_price += od.total_price
-        order_actual_price += od.acutal_price
+        x = OrderDetailVariables(od)
+
+        run_all(rule_list=rules,
+                defined_variables=OrderDetailVariables(od),
+                defined_actions=OrderDetailActions(od),
+                )
+
+        order_regular_price += od.regular_price
+        order_actual_price += od.actual_price or 0
 
     order.regular_price = order_regular_price
     order.actual_price = order_actual_price

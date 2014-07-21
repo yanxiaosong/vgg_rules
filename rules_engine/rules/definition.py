@@ -12,9 +12,9 @@ class OrderDetailVariables(BaseVariables):
     def __init__(self, order_detail):
         self.order_detail = order_detail
 
-    @string_rule_variable
+    @string_rule_variable()
     def product_code(self):
-        return self.order_detail.product.code
+        return self.order_detail.product.product_code
 
     @numeric_rule_variable()
     def product_amount(self):
@@ -98,10 +98,12 @@ def get_rules():
 
         # update the rules with promtion id
         promo_id = promo.id
-        print type(str(promo.rule_script))
-        print promo.rule_script
         rule_dict = json.loads(promo.rule_script)
-        rule_dict.update(promotion_id=promo_id)
+        actions = rule_dict["actions"]
+        for a in actions:
+            params = a["params"]
+            params.update(promotion_id=promo_id)
+
         rules.append(rule_dict)
 
     return rules
