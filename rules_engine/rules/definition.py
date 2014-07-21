@@ -4,6 +4,7 @@ from business_rules.actions import BaseActions, rule_action
 from business_rules.fields import FIELD_NUMERIC
 from business_rules.variables import BaseVariables, numeric_rule_variable, string_rule_variable
 import datetime
+from django.utils import timezone
 from rules_engine.models import OrderPromotionLog, Promotion
 
 
@@ -81,7 +82,7 @@ class OrderDetailActions(BaseActions):
 
 def log_promotion(order_detail, promotion_id):
     p_log = OrderPromotionLog()
-    p_log.promotion_date = datetime.datetime.today()
+    p_log.promotion_date = timezone.now()
     p_log.order = order_detail.order
     p_log.order_detail = order_detail
     p_log.amount = order_detail.regular_price - order_detail.actual_price
